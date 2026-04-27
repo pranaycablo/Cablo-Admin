@@ -56,6 +56,19 @@ class AuthService {
 
     return { entity, tokens };
   }
+
+  async loginWithPassword(email, password) {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) throw new Error('User not found');
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) throw new Error('Invalid credentials');
+
+    const tokens = this.generateJWT(user._id, user.role);
+    logger.info(`Admin login success: ${email}`);
+
+    return { user, tokens };
+  }
 }
 
 module.exports = new AuthService();

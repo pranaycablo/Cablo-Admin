@@ -7,6 +7,7 @@ const UserSchema = new mongoose.Schema({
   mobile: { type: String, required: true, unique: true, trim: true },
   role:   { type: String, enum: ['user', 'admin'], default: 'user' },
   status: { type: String, enum: ['active', 'blocked', 'suspended'], default: 'active' },
+  password: { type: String, select: false },
 
   walletBalance: { type: Number, default: 0 },
   negativeWalletCap: { type: Number, default: -30 }, // Platform policy
@@ -36,6 +37,18 @@ const UserSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 }, { timestamps: true });
+
+// Hash password before saving
+UserSchema.pre('save', async function() {
+  if (!this.isModified('password')) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Compare Password Method
+UserSchema.methods.matchPassword = async function(enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
 
 // Indexes
 UserSchema.index({ mobile: 1 });

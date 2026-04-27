@@ -18,6 +18,15 @@ exports.verifyOTP = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
+exports.login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) return res.status(400).json({ success: false, message: 'Email and password required' });
+    const { user, tokens } = await AuthService.loginWithPassword(email, password);
+    res.status(200).json({ success: true, tokens, profile: user });
+  } catch (err) { next(err); }
+};
+
 exports.logout = async (req, res, next) => {
   try {
     // Logic to blacklist token in Redis for secure logout goes here
