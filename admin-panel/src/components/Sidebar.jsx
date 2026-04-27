@@ -9,12 +9,14 @@ import {
   LogOut,
   TrendingUp,
   ShieldAlert,
-  Globe
+  Globe,
+  Sparkles
 } from 'lucide-react';
 
 const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+    { id: 'ai', label: 'Cablo AI Brain', icon: Sparkles },
     { id: 'captains', label: 'Captains', icon: Users },
     { id: 'rides', label: 'Live Rides', icon: MapPin },
     { id: 'fares', label: 'Fare Control', icon: Globe },

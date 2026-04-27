@@ -3,6 +3,7 @@ import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import FareManagement from './pages/FareManagement';
+import AICommand from './pages/AICommand';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -38,7 +39,8 @@ function App() {
       <main className="ml-64 flex-1">
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'fares' && <FareManagement />}
-        {activeTab !== 'dashboard' && activeTab !== 'fares' && (
+        {activeTab === 'ai' && <AICommand />}
+        {activeTab !== 'dashboard' && activeTab !== 'fares' && activeTab !== 'ai' && (
           <div className="flex items-center justify-center h-full p-20 text-center">
             <div>
               <h2 className="text-4xl font-bold mb-4 capitalize">{activeTab} Module</h2>
