@@ -7,7 +7,9 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Download,
-  Calendar
+  Calendar,
+  Car,
+  Shield
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -55,9 +57,12 @@ const Dashboard = () => {
     totalRevenue: 0,
     openFailures: 0
   });
+  const [recentRides, setRecentRides] = useState([]);
+  const [activeFailures, setActiveFailures] = useState([]);
 
   useEffect(() => {
     fetchMetrics();
+    fetchFailures();
   }, []);
 
   const fetchMetrics = async () => {
@@ -67,8 +72,21 @@ const Dashboard = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setMetrics(res.data.metrics);
+      setRecentRides(res.data.recentRides || []);
     } catch (err) {
       console.error('Failed to fetch metrics');
+    }
+  };
+
+  const fetchFailures = async () => {
+    try {
+      const token = localStorage.getItem('admin_token');
+      const res = await axios.get('http://localhost:5000/api/admin/failures', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setActiveFailures(res.data.failures || []);
+    } catch (err) {
+      console.error('Failed to fetch failures');
     }
   };
 
@@ -157,6 +175,74 @@ const Dashboard = () => {
               />
             </AreaChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+      {/* Operational Flow */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <Clock className="text-emerald-500" size={20} />
+              Live Operational Flow
+            </h3>
+            <span className="text-[10px] bg-emerald-500/10 text-emerald-500 px-3 py-1 rounded-full font-black uppercase tracking-widest animate-pulse">Real-time</span>
+          </div>
+          <div className="space-y-4">
+            {recentRides.map((ride) => (
+              <div key={ride._id} className="flex items-center justify-between p-4 bg-slate-950/50 rounded-2xl border border-slate-800/50">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-slate-800 rounded-xl flex items-center justify-center">
+                    <Car className="text-slate-500" size={18} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-white">Ride #{ride._id.slice(-6).toUpperCase()}</p>
+                    <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">{ride.status} • {ride.region || 'Global'}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-bold text-emerald-500">₹{ride.fare?.amount || 0}</p>
+                  <p className="text-[10px] text-slate-500 font-medium">{new Date(ride.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                </div>
+              </div>
+            ))}
+            {recentRides.length === 0 && (
+              <p className="text-center py-10 text-slate-600 text-xs italic">Waiting for new ride requests...</p>
+            )}
+          </div>
+          <button className="w-full mt-6 py-3 text-xs font-bold text-slate-400 hover:text-white transition-all uppercase tracking-[2px]">View All Transactions →</button>
+        </div>
+
+        <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+              <AlertTriangle className="text-red-500" size={20} />
+              AI Sentinel Alerts
+            </h3>
+            <span className="text-[10px] bg-red-500/10 text-red-500 px-3 py-1 rounded-full font-black uppercase tracking-widest">Urgent</span>
+          </div>
+          <div className="space-y-4">
+            {activeFailures.map((failure) => (
+              <div key={failure._id} className="p-4 bg-red-500/5 border border-red-500/20 rounded-2xl">
+                <div className="flex justify-between mb-2">
+                  <p className="text-sm font-bold text-white capitalize">{failure.type.replace(/_/g, ' ')}</p>
+                  <span className={`text-[10px] font-black uppercase ${failure.priority === 'high' ? 'text-red-500' : 'text-amber-500'}`}>
+                    {failure.priority}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed mb-4">{failure.description || `Automatic recovery initiated by ${failure.agentResponsible} agent.`}</p>
+                <div className="flex gap-2">
+                  <button className="flex-1 py-2 bg-red-500 text-white text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-red-600 transition-all">Override AI</button>
+                  <button className="px-4 py-2 bg-slate-800 text-white text-[10px] font-black rounded-lg uppercase tracking-widest hover:bg-slate-700 transition-all">Ignore</button>
+                </div>
+              </div>
+            ))}
+            {activeFailures.length === 0 && (
+              <div className="flex flex-col items-center justify-center py-10">
+                <Shield className="text-emerald-500/20 mb-2" size={32} />
+                <p className="text-center text-slate-600 text-xs italic">Neural Shield Active. No anomalies detected.</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

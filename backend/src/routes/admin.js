@@ -88,9 +88,16 @@ router.post('/service-tiers', protect(['admin']), async (req, res, next) => {
   try {
     const tier = await ServiceTier.findOneAndUpdate(
       { slab: req.body.slab, categoryName: req.body.categoryName, region: req.body.region || 'Global' },
-      req.body,
+      { ...req.body, updatedBy: req.user._id },
       { upsert: true, new: true }
     );
+    res.json({ success: true, tier });
+  } catch (err) { next(err); }
+});
+
+router.put('/service-tiers/:id', protect(['admin']), async (req, res, next) => {
+  try {
+    const tier = await ServiceTier.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, tier });
   } catch (err) { next(err); }
 });
@@ -105,12 +112,13 @@ router.delete('/service-tiers/:id', protect(['admin']), async (req, res, next) =
 // Dashboard summary
 router.get('/dashboard', protect(['admin']), async (req, res, next) => {
   try {
-    const [users, captains, rides, failures, tiers] = await Promise.all([
+    const [users, captains, rides, failures, tiers, recentRides] = await Promise.all([
       User.countDocuments(),
       Captain.countDocuments(),
       Ride.countDocuments(),
       FailureCase.countDocuments(),
-      ServiceTier.countDocuments()
+      ServiceTier.countDocuments(),
+      Ride.find().sort({ createdAt: -1 }).limit(5)
     ]);
     const revenue = await Ride.aggregate([
       { $match: { status: 'completed' } },
@@ -125,7 +133,8 @@ router.get('/dashboard', protect(['admin']), async (req, res, next) => {
         openFailures: failures,
         totalRevenue: revenue[0]?.total || 0,
         totalTiers: tiers
-      } 
+      },
+      recentRides
     });
   } catch (err) { next(err); }
 });

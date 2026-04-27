@@ -28,19 +28,19 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout }) => {
   ];
 
   return (
-    <div className="w-64 bg-slate-900 h-screen fixed left-0 top-0 border-r border-slate-800 flex flex-col p-4 z-50">
-      <div className="flex items-center gap-3 mb-10 px-2 py-4">
-        <div className="relative">
-          <div className="w-12 h-12 bg-amber-500 rounded-2xl flex items-center justify-center shadow-xl shadow-amber-500/20 transform -rotate-6">
-            <Car className="text-slate-900" size={28} />
+    <div className="w-64 bg-slate-950 h-screen fixed left-0 top-0 border-r border-slate-900/50 flex flex-col p-4 z-50 shadow-2xl">
+      <div className="flex items-center gap-4 mb-10 px-2 py-6 border-b border-slate-900/30">
+        <div className="relative group">
+          <div className="w-14 h-14 bg-gradient-to-br from-amber-400 to-amber-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-amber-500/20 transform group-hover:rotate-6 transition-transform">
+            <img src="/logo.png" alt="Cablo" className="w-10 h-10 object-contain brightness-0" />
           </div>
-          <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-blue-500 rounded-lg border-2 border-slate-900 flex items-center justify-center text-[10px] font-bold text-white">
-            AI
+          <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-blue-600 rounded-lg border-4 border-slate-950 flex items-center justify-center text-[8px] font-black text-white shadow-xl">
+            V2
           </div>
         </div>
         <div>
-          <h1 className="font-black text-2xl tracking-tighter text-white">CABLO</h1>
-          <p className="text-[10px] text-amber-500 font-black uppercase tracking-[3px]">Admin Pro</p>
+          <h1 className="font-black text-2xl tracking-tighter text-white leading-none">CABLO</h1>
+          <p className="text-[9px] text-amber-500 font-black uppercase tracking-[3px] mt-1">Enterprise</p>
         </div>
       </div>
 
