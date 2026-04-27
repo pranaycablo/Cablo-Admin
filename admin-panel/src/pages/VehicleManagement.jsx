@@ -289,6 +289,39 @@ const ServiceArchitecture = () => {
               </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 border-t border-slate-800 pt-8">
+              <div>
+                <label className="block text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Base Fare (₹)</label>
+                <input 
+                  type="number"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white outline-none focus:border-amber-500 font-bold"
+                  placeholder="0"
+                  value={newTier.fareLogic.baseFare}
+                  onChange={(e) => setNewTier({...newTier, fareLogic: {...newTier.fareLogic, baseFare: Number(e.target.value)}})}
+                />
+              </div>
+              <div>
+                <label className="block text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Per KM Rate (₹)</label>
+                <input 
+                  type="number"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white outline-none focus:border-amber-500 font-bold"
+                  placeholder="0"
+                  value={newTier.fareLogic.perKmRate}
+                  onChange={(e) => setNewTier({...newTier, fareLogic: {...newTier.fareLogic, perKmRate: Number(e.target.value)}})}
+                />
+              </div>
+              <div>
+                <label className="block text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Min. Fare (₹)</label>
+                <input 
+                  type="number"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-2xl p-4 text-white outline-none focus:border-amber-500 font-bold"
+                  placeholder="0"
+                  value={newTier.fareLogic.minimumFare}
+                  onChange={(e) => setNewTier({...newTier, fareLogic: {...newTier.fareLogic, minimumFare: Number(e.target.value)}})}
+                />
+              </div>
+            </div>
+
             <div className="flex gap-4">
               <button 
                 onClick={() => handleSave(newTier)}
