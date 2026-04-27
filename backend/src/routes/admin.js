@@ -6,32 +6,53 @@ const Captain = require('../models/Captain');
 const Ride = require('../models/Ride');
 const FailureCase = require('../models/FailureCase');
 
+const FareConfig = require('../models/FareConfig');
+
 // Dashboard summary
 router.get('/dashboard', protect(['admin']), async (req, res, next) => {
   try {
     const [users, captains, rides, failures] = await Promise.all([
       User.countDocuments(),
-      Captain.countDocuments({ status: 'online' }),
-      Ride.countDocuments({ status: 'started' }),
-      FailureCase.countDocuments({ status: 'open' })
+      Captain.countDocuments(), // Changed from online for overall stats
+      Ride.countDocuments(),
+      FailureCase.countDocuments()
     ]);
-    res.json({ success: true, metrics: { totalUsers: users, onlineCaptains: captains, activeRides: rides, openFailures: failures } });
+    // Revenue mock calculation (since real transactions are limited)
+    const revenue = await Ride.aggregate([
+      { $match: { status: 'completed' } },
+      { $group: { _id: null, total: { $sum: "$fare.amount" } } }
+    ]);
+
+    res.json({ 
+      success: true, 
+      metrics: { 
+        totalUsers: users, 
+        totalCaptains: captains, 
+        totalRides: rides, 
+        openFailures: failures,
+        totalRevenue: revenue[0]?.total || 0
+      } 
+    });
   } catch (err) { next(err); }
 });
 
-// Block user
-router.post('/block-user', protect(['admin']), requirePermission('USER_BLOCK'), async (req, res, next) => {
+// Fare Management
+router.get('/fare-configs', protect(['admin']), async (req, res, next) => {
   try {
-    const result = await AdminService.forceAction(req.user._id, 'USER_BLOCK', req.body.userId, req.body);
-    res.json({ success: true, result });
+    const configs = await FareConfig.find().sort({ region: 1 });
+    res.json({ success: true, configs });
   } catch (err) { next(err); }
 });
 
-// Override AI
-router.post('/override-ai', protect(['admin']), requirePermission('AI_STOP'), async (req, res, next) => {
+router.post('/fare-configs', protect(['admin']), async (req, res, next) => {
   try {
-    const result = await AdminService.updateAIState(req.body.agentName, req.body.state);
-    res.json({ success: true, result });
+    const { region, vehicleType, ...data } = req.body;
+    const config = await FareConfig.findOneAndUpdate(
+      { region, vehicleType },
+      { ...data, updatedBy: req.user._id },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, config });
   } catch (err) { next(err); }
 });
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
+import FareManagement from './pages/FareManagement';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -11,7 +12,6 @@ function App() {
   useEffect(() => {
     const token = localStorage.getItem('admin_token');
     if (token) {
-      // In real app, verify token with backend
       setIsLoggedIn(true);
     }
   }, []);
@@ -37,7 +37,8 @@ function App() {
       
       <main className="ml-64 flex-1">
         {activeTab === 'dashboard' && <Dashboard />}
-        {activeTab !== 'dashboard' && (
+        {activeTab === 'fares' && <FareManagement />}
+        {activeTab !== 'dashboard' && activeTab !== 'fares' && (
           <div className="flex items-center justify-center h-full p-20 text-center">
             <div>
               <h2 className="text-4xl font-bold mb-4 capitalize">{activeTab} Module</h2>
