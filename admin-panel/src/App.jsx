@@ -5,6 +5,8 @@ import Login from './pages/Login';
 import FareManagement from './pages/FareManagement';
 import AICommand from './pages/AICommand';
 import VehicleManagement from './pages/VehicleManagement';
+import UserManagement from './pages/UserManagement';
+import Settings from './pages/Settings';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -42,7 +44,9 @@ function App() {
         {activeTab === 'fares' && <FareManagement />}
         {activeTab === 'ai' && <AICommand />}
         {activeTab === 'vehicles' && <VehicleManagement />}
-        {activeTab !== 'dashboard' && activeTab !== 'fares' && activeTab !== 'ai' && activeTab !== 'vehicles' && (
+        {activeTab === 'captains' && <UserManagement isCaptain={true} />}
+        {activeTab === 'settings' && <Settings />}
+        {activeTab !== 'dashboard' && activeTab !== 'fares' && activeTab !== 'ai' && activeTab !== 'vehicles' && activeTab !== 'settings' && activeTab !== 'captains' && (
           <div className="flex items-center justify-center h-full p-20 text-center">
             <div>
               <h2 className="text-4xl font-bold mb-4 capitalize">{activeTab} Module</h2>

@@ -5,10 +5,76 @@ const User = require('../models/User');
 const Captain = require('../models/Captain');
 const Ride = require('../models/Ride');
 const FailureCase = require('../models/FailureCase');
-
-const FareConfig = require('../models/FareConfig');
-
 const ServiceTier = require('../models/ServiceTier');
+const FareConfig = require('../models/FareConfig');
+const GlobalConfig = require('../models/GlobalConfig');
+const DonationCause = require('../models/DonationCause');
+
+// Dynamic Config Management (API Keys, Fees)
+router.get('/config', protect(['admin']), async (req, res, next) => {
+  try {
+    const configs = await GlobalConfig.find();
+    res.json({ success: true, configs });
+  } catch (err) { next(err); }
+});
+
+router.post('/config', protect(['admin']), async (req, res, next) => {
+  try {
+    const { key, value, category, description } = req.body;
+    const config = await GlobalConfig.findOneAndUpdate(
+      { key },
+      { value, category, description, updatedBy: req.user._id },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, config });
+  } catch (err) { next(err); }
+});
+
+// User/Captain Management (Full Control)
+router.get('/users', protect(['admin']), async (req, res, next) => {
+  try {
+    const query = req.user.role === 'sub-admin' ? { region: req.user.region } : {};
+    const users = await User.find(query).limit(100).sort({ createdAt: -1 });
+    res.json({ success: true, users });
+  } catch (err) { next(err); }
+});
+
+router.put('/users/:id', protect(['admin']), async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ success: true, user });
+  } catch (err) { next(err); }
+});
+
+router.delete('/users/:id', protect(['admin']), async (req, res, next) => {
+  try {
+    await User.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'User deleted' });
+  } catch (err) { next(err); }
+});
+
+router.get('/captains', protect(['admin']), async (req, res, next) => {
+  try {
+    const query = req.user.role === 'sub-admin' ? { region: req.user.region } : {};
+    const captains = await Captain.find(query).limit(100).sort({ createdAt: -1 });
+    res.json({ success: true, captains });
+  } catch (err) { next(err); }
+});
+
+// NGO / Donation Management
+router.get('/donations', protect(['admin']), async (req, res, next) => {
+  try {
+    const causes = await DonationCause.find().sort({ isActive: -1 });
+    res.json({ success: true, causes });
+  } catch (err) { next(err); }
+});
+
+router.post('/donations', protect(['admin']), async (req, res, next) => {
+  try {
+    const cause = await DonationCause.create(req.body);
+    res.json({ success: true, cause });
+  } catch (err) { next(err); }
+});
 
 // Unified Service Management
 router.get('/service-tiers', protect(['admin']), async (req, res, next) => {
@@ -46,12 +112,10 @@ router.get('/dashboard', protect(['admin']), async (req, res, next) => {
       FailureCase.countDocuments(),
       ServiceTier.countDocuments()
     ]);
-    // Revenue mock calculation
     const revenue = await Ride.aggregate([
       { $match: { status: 'completed' } },
       { $group: { _id: null, total: { $sum: "$fare.amount" } } }
     ]);
-
     res.json({ 
       success: true, 
       metrics: { 
@@ -63,48 +127,6 @@ router.get('/dashboard', protect(['admin']), async (req, res, next) => {
         totalTiers: tiers
       } 
     });
-  } catch (err) { next(err); }
-});
-
-// Vehicle Categories
-router.get('/vehicle-categories', protect(['admin']), async (req, res, next) => {
-  try {
-    const categories = await VehicleCategory.find().sort({ slab: 1, displayOrder: 1 });
-    res.json({ success: true, categories });
-  } catch (err) { next(err); }
-});
-
-router.post('/vehicle-categories', protect(['admin']), async (req, res, next) => {
-  try {
-    const category = await VehicleCategory.create(req.body);
-    res.json({ success: true, category });
-  } catch (err) { next(err); }
-});
-
-router.put('/vehicle-categories/:id', protect(['admin']), async (req, res, next) => {
-  try {
-    const category = await VehicleCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json({ success: true, category });
-  } catch (err) { next(err); }
-});
-
-// Fare Management
-router.get('/fare-configs', protect(['admin']), async (req, res, next) => {
-  try {
-    const configs = await FareConfig.find().sort({ region: 1 });
-    res.json({ success: true, configs });
-  } catch (err) { next(err); }
-});
-
-router.post('/fare-configs', protect(['admin']), async (req, res, next) => {
-  try {
-    const { region, vehicleType, ...data } = req.body;
-    const config = await FareConfig.findOneAndUpdate(
-      { region, vehicleType },
-      { ...data, updatedBy: req.user._id },
-      { upsert: true, new: true }
-    );
-    res.json({ success: true, config });
   } catch (err) { next(err); }
 });
 
