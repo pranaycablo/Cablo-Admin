@@ -14,7 +14,7 @@ const app = express();
 // ── Security Middleware ──────────────────────────────
 app.use(helmet());
 app.use(cors({
-  origin: process.env.ALLOWED_ORIGINS || '*',
+  origin: [process.env.ALLOWED_ORIGINS || '*', 'http://localhost:5173'],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
