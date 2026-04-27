@@ -4,6 +4,7 @@ import Dashboard from './pages/Dashboard';
 import Login from './pages/Login';
 import FareManagement from './pages/FareManagement';
 import AICommand from './pages/AICommand';
+import VehicleManagement from './pages/VehicleManagement';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -40,7 +41,8 @@ function App() {
         {activeTab === 'dashboard' && <Dashboard />}
         {activeTab === 'fares' && <FareManagement />}
         {activeTab === 'ai' && <AICommand />}
-        {activeTab !== 'dashboard' && activeTab !== 'fares' && activeTab !== 'ai' && (
+        {activeTab === 'vehicles' && <VehicleManagement />}
+        {activeTab !== 'dashboard' && activeTab !== 'fares' && activeTab !== 'ai' && activeTab !== 'vehicles' && (
           <div className="flex items-center justify-center h-full p-20 text-center">
             <div>
               <h2 className="text-4xl font-bold mb-4 capitalize">{activeTab} Module</h2>

@@ -8,16 +8,19 @@ const FailureCase = require('../models/FailureCase');
 
 const FareConfig = require('../models/FareConfig');
 
+const VehicleCategory = require('../models/VehicleCategory');
+
 // Dashboard summary
 router.get('/dashboard', protect(['admin']), async (req, res, next) => {
   try {
-    const [users, captains, rides, failures] = await Promise.all([
+    const [users, captains, rides, failures, categories] = await Promise.all([
       User.countDocuments(),
-      Captain.countDocuments(), // Changed from online for overall stats
+      Captain.countDocuments(),
       Ride.countDocuments(),
-      FailureCase.countDocuments()
+      FailureCase.countDocuments(),
+      VehicleCategory.countDocuments()
     ]);
-    // Revenue mock calculation (since real transactions are limited)
+    // Revenue mock calculation
     const revenue = await Ride.aggregate([
       { $match: { status: 'completed' } },
       { $group: { _id: null, total: { $sum: "$fare.amount" } } }
@@ -30,9 +33,32 @@ router.get('/dashboard', protect(['admin']), async (req, res, next) => {
         totalCaptains: captains, 
         totalRides: rides, 
         openFailures: failures,
-        totalRevenue: revenue[0]?.total || 0
+        totalRevenue: revenue[0]?.total || 0,
+        totalCategories: categories
       } 
     });
+  } catch (err) { next(err); }
+});
+
+// Vehicle Categories
+router.get('/vehicle-categories', protect(['admin']), async (req, res, next) => {
+  try {
+    const categories = await VehicleCategory.find().sort({ slab: 1, displayOrder: 1 });
+    res.json({ success: true, categories });
+  } catch (err) { next(err); }
+});
+
+router.post('/vehicle-categories', protect(['admin']), async (req, res, next) => {
+  try {
+    const category = await VehicleCategory.create(req.body);
+    res.json({ success: true, category });
+  } catch (err) { next(err); }
+});
+
+router.put('/vehicle-categories/:id', protect(['admin']), async (req, res, next) => {
+  try {
+    const category = await VehicleCategory.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json({ success: true, category });
   } catch (err) { next(err); }
 });
 
