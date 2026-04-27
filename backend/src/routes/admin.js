@@ -8,17 +8,43 @@ const FailureCase = require('../models/FailureCase');
 
 const FareConfig = require('../models/FareConfig');
 
-const VehicleCategory = require('../models/VehicleCategory');
+const ServiceTier = require('../models/ServiceTier');
+
+// Unified Service Management
+router.get('/service-tiers', protect(['admin']), async (req, res, next) => {
+  try {
+    const tiers = await ServiceTier.find().sort({ slab: 1, displayOrder: 1 });
+    res.json({ success: true, tiers });
+  } catch (err) { next(err); }
+});
+
+router.post('/service-tiers', protect(['admin']), async (req, res, next) => {
+  try {
+    const tier = await ServiceTier.findOneAndUpdate(
+      { slab: req.body.slab, categoryName: req.body.categoryName, region: req.body.region || 'Global' },
+      req.body,
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, tier });
+  } catch (err) { next(err); }
+});
+
+router.delete('/service-tiers/:id', protect(['admin']), async (req, res, next) => {
+  try {
+    await ServiceTier.findByIdAndDelete(req.params.id);
+    res.json({ success: true, message: 'Tier deleted' });
+  } catch (err) { next(err); }
+});
 
 // Dashboard summary
 router.get('/dashboard', protect(['admin']), async (req, res, next) => {
   try {
-    const [users, captains, rides, failures, categories] = await Promise.all([
+    const [users, captains, rides, failures, tiers] = await Promise.all([
       User.countDocuments(),
       Captain.countDocuments(),
       Ride.countDocuments(),
       FailureCase.countDocuments(),
-      VehicleCategory.countDocuments()
+      ServiceTier.countDocuments()
     ]);
     // Revenue mock calculation
     const revenue = await Ride.aggregate([
@@ -34,7 +60,7 @@ router.get('/dashboard', protect(['admin']), async (req, res, next) => {
         totalRides: rides, 
         openFailures: failures,
         totalRevenue: revenue[0]?.total || 0,
-        totalCategories: categories
+        totalTiers: tiers
       } 
     });
   } catch (err) { next(err); }
