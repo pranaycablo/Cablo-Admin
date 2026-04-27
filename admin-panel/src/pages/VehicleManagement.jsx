@@ -179,6 +179,23 @@ const ServiceArchitecture = () => {
                               }}
                             />
                           </div>
+                          <div>
+                            <p className="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1">Status</p>
+                            <button 
+                              onClick={() => {
+                                const newTiers = [...tiers];
+                                const target = newTiers.find(t => t._id === tier._id);
+                                target.isActive = !target.isActive;
+                                setTiers(newTiers);
+                                handleSave(target);
+                              }}
+                              className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter transition-all ${
+                                tier.isActive ? 'bg-emerald-500 text-slate-900' : 'bg-slate-800 text-slate-500'
+                              }`}
+                            >
+                              {tier.isActive ? 'Active (ON)' : 'Disabled (OFF)'}
+                            </button>
+                          </div>
                           <div className="flex items-center gap-2">
                             <button 
                               onClick={() => handleSave(tier)}
